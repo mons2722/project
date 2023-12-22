@@ -6,15 +6,33 @@
 #define max 100
 double stack[max];
 int top=-1;
+int buf[max]; /* buffer for ungetch */
+int bufp = 0;     /* next free position in buf */
+
+
+
+/* getch: get a (possibly pushed back) character */
+
+int getch(void) {
+    return (bufp > 0) ? buf[--bufp] : getchar();
+}
 double pop()
 { //printf("pop=%d\n",stack[top]);
-	return stack[top--];
-
+	return stack[top--];}
+void ungetch(int c) {
+    if (bufp >= max)
+        printf("ungetch: too many characters \n");
+    else
+        buf[bufp++] = c;
 }
+
+
 void  push(double n)
 {stack[++top]=n;
 //printf("push=%d\n",stack[top]);
 }
+void ungets(char s[])
+{ printf("%s",s);}
 void main()
 {
 	double op;
@@ -28,8 +46,15 @@ void main()
         {s[i++]=c;}
 	s[i]='\0';
 	printf("%s",s);
-        int j;
-	for(j=0;s[j]!='\0';j++)
+	 int j=0,count=0;
+         while(j<=strlen(s)-1)
+	 {if(isdigit(s[j++]))
+		 {count++;
+			 break;}}
+	 if(count==0)
+		 ungets(s);
+	 else {
+	 for(j=0;s[j]!='\0';j++)
 	{i=0;
 		if(isspace(s[j]))
 		continue;
@@ -84,4 +109,4 @@ void main()
 		     }
 	}
        printf("\nv= %.4lf",stack[top]);
-}
+	 }}

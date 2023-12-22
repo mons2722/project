@@ -15,6 +15,8 @@ void  push(double n)
 {stack[++top]=n;
 //printf("push=%d\n",stack[top]);
 }
+void ungets(char s[])
+{ printf("%s",s);}
 void main()
 {
 	double op;
@@ -28,8 +30,15 @@ void main()
         {s[i++]=c;}
 	s[i]='\0';
 	printf("%s",s);
-        int j;
-	for(j=0;s[j]!='\0';j++)
+	 int j=0,count=0;
+         while(j<=strlen(s)-1)
+	 {if(isdigit(s[j++]))
+		 {count++;
+			 break;}}
+	 if(count==0)
+		 ungets(s);
+	 else {
+	 for(j=0;s[j]!='\0';j++)
 	{i=0;
 		if(isspace(s[j]))
 		continue;
@@ -84,4 +93,4 @@ void main()
 		     }
 	}
        printf("\nv= %.4lf",stack[top]);
-}
+	 }}
