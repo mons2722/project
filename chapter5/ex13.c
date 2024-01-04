@@ -7,7 +7,21 @@
 
 char *lineptr[MAXLINES];    
 
-int readlines(char *lineptr[], char *linestor, int MAXLINE)
+int getline3(char *s, int lim)
+{
+    int c;
+    char *p;
+    p = s;
+    while (--lim >0 && (c = getchar())!=EOF && c!='\n') {
+        *s++ = c;
+    }
+    if(c == '\n')
+        *s++ = c;
+    *s = '\0';
+    return (int)(s - p);
+}
+
+int readlines(char *lineptr[], char *linestor, int maxline)
 {
     int len, nlines;
     nlines = 0;
@@ -29,42 +43,34 @@ int readlines(char *lineptr[], char *linestor, int MAXLINE)
             p += len;
         }
     }
-    printf("nlines:%d\n", nlines);
+   
     return nlines;
-}
-
-int getline3(char *s, int lim)
-{
-    int c;
-    char *p;
-    p = s;
-    while (--lim >0 && (c = getchar())!=EOF && c!='\n') {
-        *s++ = c;
-    }
-    if(c == '\n')
-        *s++ = c;
-    *s = '\0';
-    return (int)(s - p);
 }
 
 /*  writelines: write output lines*/
 void writelines(char *lineptr[], int nlines,int pos)
 {
-    while(nlines-- >0)
-        printf("%s\n", *lineptr++);
+  int i=0;
+  while(i++<pos)
+	  *lineptr++;
+ while(pos++<nlines)
+	printf("%s\n",*lineptr++); 
+        
 }
 
-int tail(char *lineptr[],int n)
-{
 
-void main ()
+void main (int argc, char *argv[])
 {
     int nlines;             /* number of input lines to read */
     char linestor[MAXSTOR]; /* store the input lines */
-
+    int count=10;
+    if (argc!=1)
+    {++argv;
+    if((*argv)[0]=='-')
+        count=(*argv)[1]-'0';}
     nlines = readlines(lineptr, linestor, MAXLINES);
-    int pos= tail(lineptr,nlines);
-
+   int pos= nlines-count;
+    writelines(lineptr,nlines,pos);
 }
 
 
