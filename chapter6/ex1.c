@@ -3,7 +3,7 @@
 #include<ctype.h>
 
 struct keyword
-{   char *word;
+{   char word[100];
 	int count;
 }key[] = {"auto", 0, "break", 0, "case", 0, "char", 0,
               "const", 0, "continue", 0, "default", 0, "do", 0,
@@ -16,35 +16,64 @@ struct keyword
 
 #define N (sizeof(key)/sizeof(key[0]))
 #define MAX 100
-int getword(char *word, int lim)
-{ int c;
-  char *w;
-  c=getchar();
-    while(isspace(c))
-	  c=getchar();
-    if(!isalpha(c))
-    {  if(c=='#')
-    {while((c=getchar())!='\n')
-	     ;    }
-    else if((c=getchar())=='\"')
-    {while((c=getchar())!='\"')
-             ;    }
-    else if((c=getchar())=='/')
-    { if((c=getchar())=='*')
-	    {   while((c=getchar())!='*'&&(c=getchar())=='/')
-		    ; }
-      else { while((c=getchar())!='\n')
-		      ;  }      }
-      return c;
-      }
-      else
-          { while(c!='\n'||c!=EOF||c!=' '||c!='\t')
-	      { *w++=c;
-	         c=getchar();}}
-	      *w='\0';
-	      return c;
-	      }
-     
+
+int getword(char *word, int lim) {
+    int c, getch(void);
+    void ungetch(int);
+    char *w = word;
+    int t;
+
+    while (isspace(c = getch()));
+    if (c != EOF)
+        *w++ = c;
+    if (!isalpha(c)) {
+        if (c == '\"') { /*string constant*/
+            for (c = getch(); c != '\"'; c = getch());
+        } else if (c == '#') { /*preprocessor*/
+            for (c = getch(); c != '\n'; c = getch());
+        } else if (c == '/')            /*comment*/
+            if ((c = getch()) == '/') { /*single comment*/
+                for (c = getch(); c != '\n'; c = getch());
+            } else if (c == '*') { /*mutiline comment*/
+                for (c = getch(), t = getch(); c != '*' && t != '/';
+                     c = getch(), t = getch())
+                    ungetch(t);
+            } else
+                ungetch(c);
+        else /*underscore*/
+            for (; !isspace(c) && c != EOF; c = getch());
+        if (c != '\"' && c != '\n' && c != '/')
+            ungetch(c);
+        *w = '\0';
+        return c;
+    }
+
+    for (; --lim > 0; w++)
+        if (!isalnum(*w = getch())) {
+            if (!isspace(*w)) {
+                ungetch(*w);
+                return (*w);
+            } else {
+                ungetch(*w);
+                break;
+            }
+        }
+    *w = '\0';
+    return word[0];
+}
+
+#define BUFSIZE 100
+char buf[BUFSIZE];
+int bufp = 0;
+
+int getch(void) { return (bufp > 0) ? buf[--bufp] : getchar(); }
+
+void ungetch(int c) {
+    if (bufp >= BUFSIZE)
+        printf("ungetch: too many characters\n");
+    else
+        buf[bufp++] = c;
+}    
  int binsearch(char *word, struct keyword key[], int n) 
  {
     int cond;
@@ -66,16 +95,18 @@ int getword(char *word, int lim)
 void main()
 {
  int c,n;
- char *w;
+ char w[MAX]; 
  while((c=getword(w,MAX))!=EOF)
  { if(isalpha(w[0]))
-    {if(n=binsearch(w,key,N)!=-1)
+    {// printf("%s\n",w);
+	    if((n=binsearch(w,key,N))!=-1)
 	    key[n].count++;
     }
  }
 
  for(int i=0;i<N;i++)
- { printf("%s - %d\n",key[i].word,key[i].count);
+ { if(key[i].count!=0)
+	 printf("%s - %d\n",key[i].word,key[i].count);
  }
 }
    
